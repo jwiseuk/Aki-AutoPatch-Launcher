@@ -2,6 +2,7 @@ import os
 import zipfile
 import requests
 from tqdm import tqdm
+from requests_toolbelt.multipart.encoder import MultipartEncoder, MultipartEncoderMonitor
 
 # Config
 folders = ['config', 'plugins']
@@ -21,15 +22,20 @@ def compress_folders_to_zip(zip_filename, folders_to_compress):
                         pbar.update(1)
 
 def upload_zip_to_server(zip_filename, server_url):
+    file_size = os.path.getsize(zip_filename)
+    
     with open(zip_filename, 'rb') as file:
-        files = {'file': file}
-        with tqdm(desc='Uploading', unit='B', unit_scale=True) as pbar:
-            response = requests.post(server_url, files=files, stream=True)
-            content = b''  # Variable to store response content
-            for chunk in response.iter_content(chunk_size=1024):
-                if chunk:
-                    pbar.update(len(chunk))
-                    content += chunk  # Append response content
+        encoder = MultipartEncoder(fields={'file': ('filename', file, 'application/zip')})
+        
+        with tqdm(total=file_size, unit='B', unit_scale=True, desc='Uploading') as pbar:
+            def monitor_callback(monitor):
+                pbar.update(monitor.bytes_read - pbar.n)
+            
+            monitor = MultipartEncoderMonitor(encoder, monitor_callback)
+            headers = {'Content-Type': monitor.content_type}
+
+            response = requests.post(server_url, data=monitor, headers=headers)
+            content = response.content
 
     if response.status_code == 200:
         print("File uploaded successfully.")
@@ -37,7 +43,6 @@ def upload_zip_to_server(zip_filename, server_url):
         print(f"Error uploading file: {content.decode('utf-8')}")
         if response.status_code == 403:
             print("Your IP is not whitelisted.")
-
 
 if __name__ == "__main__":
     # Compress the folders to the zip file

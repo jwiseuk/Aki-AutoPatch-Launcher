@@ -4,7 +4,6 @@ Flask server ran with docker to enable file upload/serving. Designed to run alon
 ## Server Instructions
 
 [Follow this guide to setup SPT/Fika with Docker](https://github.com/OnniSaarni/SPT-Fika-Docker-Guide)
-[Follow this guide to setup SPT/Fika with Docker]()
 
 **Create Directories**
 

@@ -10,7 +10,7 @@ Flask server ran with docker to enable file upload/serving. Designed to run alon
 Copy the scripts to your server, follow the below folder structure:
 
 ```
-project/
+flaskserv/
 │
 ├── app/
 │   ├── Dockerfile
@@ -25,7 +25,7 @@ project/
 From the project directory:
 
 ```
-docker build -t flask-upload-app ./app
+docker build -t flaskserv ./app
 ```
 
 **Run**

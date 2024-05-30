@@ -1,10 +1,10 @@
-from flask import Flask, request
+from flask import Flask, request, send_file
 import hashlib
 import os
 
 app = Flask(__name__)
 
-# Absolute path to the Apache folder
+# Set the directory path for uploads and downloads
 APACHE_FOLDER = '/var/www/html/'
 
 # Get allowed IPs from environment variable
@@ -16,14 +16,15 @@ def upload_file():
     if client_ip in ALLOWED_IPS:
         file = request.files.get('file')
         if file:
-            file_path = os.path.join(APACHE_FOLDER, 'bepinex.zip')
+            filename = secure_filename(file.filename)
+            file_path = os.path.join(APACHE_FOLDER, filename)
             file.save(file_path)
             # Generate MD5 checksum
             md5_hash = hashlib.md5()
             with open(file_path, 'rb') as f:
                 for chunk in iter(lambda: f.read(4096), b""):
                     md5_hash.update(chunk)
-            md5_file_path = os.path.join(APACHE_FOLDER, 'bepinex.zip.md5')
+            md5_file_path = os.path.join(APACHE_FOLDER, filename + '.md5')
             with open(md5_file_path, 'w') as f:
                 f.write(md5_hash.hexdigest())
             return 'File uploaded successfully.', 200
@@ -32,9 +33,9 @@ def upload_file():
     else:
         return 'Access denied. Your IP is not whitelisted.', 403
 
-@app.route('/download', methods=['GET'])
-def download_file():
-    file_path = os.path.join(APACHE_FOLDER, 'bepinex.zip')
+@app.route('/download/<filename>', methods=['GET'])
+def download_file(filename):
+    file_path = os.path.join(APACHE_FOLDER, filename)
     if os.path.exists(file_path):
         return send_file(file_path, as_attachment=True)
     else:

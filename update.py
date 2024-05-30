@@ -8,7 +8,7 @@ import requests
 from tqdm import tqdm
 
 # Configuration
-URL = 'http://YOURSERVERIP/bepinex.zip'
+URL = 'http://YOURSERVERIP:5000/download/bepinex.zip'
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 LOCAL_FILENAME = os.path.join('Bepinex', 'bepinex.zip')
 DIRECTORIES_TO_DELETE = ['config', 'plugins']
